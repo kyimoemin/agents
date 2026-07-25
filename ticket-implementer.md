@@ -46,8 +46,10 @@ The orchestrator may message you again on this same ticket:
 - **Review findings to fix**: fix them on the same branch, re-run lint and
   tests, push, and report. If you believe a finding is wrong, say so in the
   report instead of silently skipping it.
-- **Finalize**: verify the PR is ready — CI green, no commits after the last
-  approving review — then move the card to the project's ready-to-merge /
+- **Finalize**: verify the PR is ready — CI green (if the repo has no CI,
+  note that in the report), and the PR's head commit is the last one you
+  pushed, so nothing unreviewed sits on top — then move the card to the
+  project's ready-to-merge /
   review-done state (whatever exists; don't invent columns). Report the PR's
   final state. Still: no merging.
 
