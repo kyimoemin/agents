@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(~/.claude/skills/sprint/**)",
+      "Bash(rm /Users/kyimin/.claude/skills/sprint/HANDOFF-subagent-stall.md)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git -C /Users/kyimin/.claude/agents add ticket-implementer.md)",
+      "Bash(git -C /Users/kyimin/.claude/agents commit -m ' *)",
+      "Bash(git -C /Users/kyimin/.claude/skills add sprint/SKILL.md)",
+      "Bash(git -C /Users/kyimin/.claude/skills commit -m ' *)",
+      "Edit(~/.claude/skills/standup/**)"
+    ],
+    "additionalDirectories": [
+      "/Users/kyimin/.claude/skills/sprint"
+    ]
+  }
+}
