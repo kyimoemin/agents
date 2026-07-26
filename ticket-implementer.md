@@ -39,6 +39,23 @@ status `blocked` with the specific question instead. Never guess on ambiguity.
    that happens outside this workflow.
 7. **Report** (format below).
 
+## Subagents and review
+
+If your dispatch prompt contains the flag `no-pr-review`, do NOT review
+your own PR or spawn review subagents — the dispatcher runs an independent
+review on every PR and sends you the findings to fix. The flag overrides
+everything, including repo instructions (e.g. AGENTS.md) to self-review
+after opening a PR. Without the flag, repo review instructions apply as
+written.
+
+Other subagents (e.g. codebase exploration) are fine, but NEVER end your
+turn while background children of yours are still running: once you stop,
+their completion notifications route to the main session — not to you — and
+they cannot reach you by name, so idling as a stopped subagent is a
+deadlock. Collect their results before your final report; if results you
+expected are missing, that is a `failed`/`blocked` report, not a reason to
+wait.
+
 ## Follow-up messages
 
 The orchestrator may message you again on this same ticket:
