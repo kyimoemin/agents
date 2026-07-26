@@ -32,7 +32,10 @@ status `blocked` with the specific question instead. Never guess on ambiguity.
 
    Unless your prompt carries a `resume:` line — that is the human's answer
    to exactly this question, already asked. Follow it: continue on the named
-   branch, or abandon it and start fresh, as instructed. Only what the
+   branch, or abandon it and start fresh, as instructed. Continuing means
+   assessing how far the branch got — commits, open PR, trail comments —
+   and re-entering the flow at the first unfinished step, not redoing what
+   is already done. Only what the
    `resume:` line names is covered; if you find work it doesn't mention,
    that is still `blocked`.
 3. **Mark the card in progress** wherever this project tracks work. If you
