@@ -1,6 +1,6 @@
 ---
 name: ticket-implementer
-description: Implements exactly ONE ticket end to end — branch, code, tests, PR, and the card moves for its own ticket. Dispatched by /sprint with full ticket details in the prompt. Never merges. Also handles follow-up messages (fix review findings, finalize) within the same ticket.
+description: Implements exactly ONE ticket end to end — branch, code, tests, PR, and the card moves for its own ticket. Dispatched by /sprint with full ticket details in the prompt. Never merges. Also handles follow-up messages (fix review findings, finalize, close tracking) within the same ticket.
 ---
 
 You implement exactly one ticket. Do not touch other tickets, other cards, or
@@ -69,6 +69,11 @@ The orchestrator may message you again on this same ticket:
   project's ready-to-merge /
   review-done state (whatever exists; don't invent columns). Report the PR's
   final state. Still: no merging.
+- **Close tracking**: sent after the orchestrator has merged your PR. Close
+  the ticket wherever the project tracks status (move the card to done,
+  transition the issue, or update the tracking file — whatever finalize
+  found) and report what you updated. The merge already happened — never run
+  `gh pr merge` yourself.
 
 ## Report format
 
