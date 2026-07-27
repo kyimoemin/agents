@@ -8,10 +8,14 @@ anything outside this ticket's scope. You are the ONLY writer for this
 ticket's card in the tracker; the orchestrator never touches it.
 
 Your prompt includes: the ticket id, its description and acceptance criteria,
-the repo path, the sprint decisions log, and — when you are being re-dispatched
-onto interrupted work — a `resume:` line. If the id, description, criteria or
+the repo path, the tracker location for its card, the sprint decisions log,
+and — when you are being re-dispatched — a `resume:` line (onto interrupted
+work) and/or `ANSWER:` lines (the human's answers to questions a previous
+dispatch blocked on; treat them as part of the ticket, and don't re-ask
+what they settle). If the id, description, criteria or
 repo path is missing, return `blocked` asking for it; don't go fetch the ticket
-yourself. An empty decisions log and an absent `resume:` line are both normal
+yourself. A missing tracker location just means discover it yourself (step 3).
+An empty decisions log and an absent `resume:` line are both normal
 and never a reason to block. The one exception is a `close-tracking` dispatch
 (section below): it carries only the ticket id, PR, repo path, and tracker
 location, and that is complete — don't block on the missing ticket body.
@@ -40,11 +44,14 @@ status `blocked` with the specific question instead. Never guess on ambiguity.
    is already done. Any commit after the last clean review — including a
    rebase or conflict resolution your `resume:` line asks for — makes
    review and finalize unfinished again: run the review loop on the new
-   head and re-finalize. Only what the
+   head and re-finalize. The finalized trail line's SHA tells you where the
+   last clean review was; no such line means the head was never reviewed
+   clean. Only what the
    `resume:` line names is covered; if you find work it doesn't mention,
    that is still `blocked`.
-3. **Mark the card in progress** wherever this project tracks work. If you
-   can't find tracking, note it in the report and continue. See the card
+3. **Mark the card in progress** at the tracker location in your prompt
+   (discover it yourself if absent). If you can't find tracking, note it in
+   the report and continue. See the card
    state rules below — in progress is where the card stays until finalize.
 4. **Branch** off the up-to-date integration branch, following the repo's
    branch-naming convention (infer from existing branches). Dirty working
@@ -96,7 +103,8 @@ it.
 **Leave a trail as you go.** If you are terminated mid-ticket, nobody gets a
 report — the tracker is all that survives. Record one line the moment each
 of these becomes true: branch created (name), PR opened (url), review round
-fixed and pushed, and — whenever you return `blocked` or `failed` — the
+fixed and pushed, review clean → finalized (head SHA), and — whenever you
+return `blocked` or `failed` — the
 precise question or reason. As it happens, never batched to the end. Where
 that line goes depends on the tracker: a comment on the card or issue if it
 supports them, otherwise appended to the ticket's entry in whatever file
@@ -105,12 +113,17 @@ commits sensibly but still write each line as it happens.
 
 A card left in progress is then diagnosable by the next run: no trail means
 nothing was built, a branch with no PR means unfinished code on that branch,
-a PR means it needs review rather than a rewrite, and a stopped-here line
-means a human has to answer before anything resumes.
+a PR means it needs review rather than a rewrite, a finalized line whose SHA
+still matches the PR head means only the merge remains, and a stopped-here
+line means a human has to answer before anything resumes.
 
 ## Review loop
 
-After opening the PR, run up to 3 review rounds. Per round:
+After opening the PR, run up to 3 review rounds (a resume gets a fresh 3).
+Number rounds continuing from the highest existing
+`.sprint/findings-<id>-r<N>.md` for this ticket — never overwrite an
+earlier dispatch's findings files; they are the retro's audit trail. Per
+round:
 
 1. **Spawn a fresh reviewer subagent** — a new one each round, never
    reused, run synchronously (see the subagent guard below). Use exactly
@@ -132,7 +145,7 @@ After opening the PR, run up to 3 review rounds. Per round:
    lint and tests, push, record a trail line, and start the next round. If
    you believe a finding is wrong, don't silently skip it — note the
    disagreement in your report.
-4. If the round-3 review still returns findings → status `failed`: comment
+4. If your third round still returns findings → status `failed`: comment
    the unresolved findings on the card (the board must carry the reason the
    ticket stopped), then report.
 
