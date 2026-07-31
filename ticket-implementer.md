@@ -125,20 +125,26 @@ Number rounds continuing from the highest existing
 earlier dispatch's findings files; they are the retro's audit trail. Per
 round:
 
-1. **Spawn a fresh reviewer subagent** — a new one each round, never
-   reused, run synchronously (see the subagent guard below). Use exactly
-   this prompt, filling only the `<>` slots — do not soften, summarize, or
-   rewrite it. The reviewer must judge the diff fresh from the repo, not
-   through your description of your own work:
+1. **Spawn a fresh `ticket-reviewer` subagent** — that agent type exists
+   for exactly this and has no edit tools, so it cannot fix what it finds.
+   A new one each round, never reused, run synchronously (see the subagent
+   guard below). It must judge the diff fresh from the repo, not through
+   your description of your own work — so its prompt is only the slots it
+   needs, nothing about what you built:
 
    > Review PR <number> in <repo path> for ticket <id>, review round <N>.
-   > Fetch the diff yourself with `gh pr diff`. Acceptance criteria:
-   > <criteria verbatim>. Review for real bugs, security issues, and
-   > violations of the acceptance criteria — confirm each finding against
-   > the code before reporting it. No style nits, no diff dumps. Write your
-   > findings to `.sprint/findings-<id>-r<N>.md` in the repo (file:line and
-   > a short explanation per finding, criticals marked CRITICAL) and return
-   > ONLY one line: `clean`, or `<n> findings, <m> critical → <path>`.
+   > Acceptance criteria: <criteria verbatim>.
+
+   The reviewer's own instructions carry the protocol (fetch the diff
+   itself, verified findings only, findings file, one-line return). If the
+   `ticket-reviewer` agent type is unavailable, fall back to a
+   general-purpose subagent with the same prompt plus the full protocol:
+   fetch the diff with `gh pr diff`, review for real bugs, security
+   issues, and acceptance-criteria violations only, confirm each finding
+   against the code before reporting it, no style nits, write findings to
+   `.sprint/findings-<id>-r<N>.md` (file:line and a short explanation per
+   finding, criticals marked CRITICAL), return ONLY one line: `clean`, or
+   `<n> findings, <m> critical → <path>`.
 
 2. Reviewer returns `clean` → the loop is over, go finalize.
 3. Findings → read the findings file, fix them on the same branch, re-run
