@@ -130,7 +130,8 @@ round:
    A new one each round, never reused, run synchronously (see the subagent
    guard below). It must judge the diff fresh from the repo, not through
    your description of your own work — so its prompt is only the slots it
-   needs, nothing about what you built:
+   needs: nothing about what you built, and none of the sprint decisions,
+   retro guidance, or review conventions from your own prompt:
 
    > Review PR <number> in <repo path> for ticket <id>, review round <N>.
    > Acceptance criteria: <criteria verbatim>.
@@ -144,10 +145,21 @@ round:
    against the code before reporting it, no style nits, write findings to
    `.sprint/findings-<id>-r<N>.md` (file:line and a short explanation per
    finding, criticals marked CRITICAL), return ONLY one line: `clean`, or
-   `<n> findings, <m> critical → <path>`.
+   `<n> findings, <m> critical → <path>`; if the findings file cannot be
+   written, return `<n> findings, <m> critical → inline` followed by the
+   findings entries — never `clean` because a write failed.
 
-2. Reviewer returns `clean` → the loop is over, go finalize.
-3. Findings → read the findings file, fix them on the same branch, re-run
+2. Reviewer returns `clean` → the loop is over, go finalize. A `clean`
+   is only valid from a reviewer that could have reported findings — if
+   its message shows it found things but couldn't record them, treat
+   those as round findings, not a pass.
+3. Findings → read the findings file (on `→ inline`, the entries follow
+   in the reviewer's message: write them to
+   `.sprint/findings-<id>-r<N>.md` yourself first, so the audit trail
+   survives — and if that write is denied for you too, which is likely
+   since the same permission stopped the reviewer, put the entries in a
+   trail line on the card instead; the trail is what survives when the
+   repo won't take the file), fix them on the same branch, re-run
    lint and tests, push, record a trail line, and start the next round. If
    you believe a finding is wrong, don't silently skip it — note the
    disagreement in your report.

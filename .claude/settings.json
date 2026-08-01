@@ -9,7 +9,23 @@
       "Bash(git -C /Users/kyimin/.claude/agents commit -m ' *)",
       "Bash(git -C /Users/kyimin/.claude/skills add sprint/SKILL.md)",
       "Bash(git -C /Users/kyimin/.claude/skills commit -m ' *)",
-      "Edit(~/.claude/skills/standup/**)"
+      "Edit(~/.claude/skills/standup/**)",
+      "Bash(ls /Users/kyimin/.claude/skills/ && ls /Users/kyimin/.claude/commands/ 2>/dev/null)",
+      "Read(//Users/kyimin/.claude/**)",
+      "Bash(grep -rn \"ticket-implementer\\\\|status: done\\\\|status \\\\`done\\\\`\" --include=\"*.md\" --include=\"*.json\" agents skills commands)",
+      "Bash(git -C /Users/kyimin/.claude/agents status --short)",
+      "Bash(git -C /Users/kyimin/.claude/agents remote -v)",
+      "Bash(git -C /Users/kyimin/.claude/skills status --short)",
+      "Bash(git -C /Users/kyimin/.claude/skills remote -v)",
+      "Bash(git -C /Users/kyimin/.claude/agents commit -m 'separate ticket status from agent report status *)",
+      "Bash(git -C /Users/kyimin/.claude/skills commit -m 'add an append-only run log and resume path to /sprint *)",
+      "Bash(git -C /Users/kyimin/.claude/skills rev-parse --show-toplevel)",
+      "Bash(git commit -m 'record orchestrator-declared failures and define resume semantics *)",
+      "Bash(git -C /Users/kyimin/.claude/skills commit -m 'comment unresolved findings on card when fix loop exhausts *)",
+      "Bash(git commit --amend -m 'define resume semantics: re-enter flow at first unfinished step *)",
+      "Bash(git -C /Users/kyimin/.claude/agents log --date=iso --pretty='%h %ad %s' -15)",
+      "Bash(git -C /Users/kyimin/.claude/skills log --date=iso --pretty='%h %ad %s' -20 -- sprint)",
+      "Bash(git -C /Users/kyimin/.claude/skills log --date=iso --pretty='%h %ad %s' -20)"
     ],
     "additionalDirectories": [
       "/Users/kyimin/.claude/skills/sprint"
