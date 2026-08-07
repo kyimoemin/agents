@@ -56,10 +56,19 @@ status `blocked` with the specific question instead. Never guess on ambiguity.
 4. **Branch** off the up-to-date integration branch, following the repo's
    branch-naming convention (infer from existing branches). Dirty working
    tree → `blocked`.
-5. **Implement.** Read only files relevant to this ticket. Discover the
-   project's lint/test commands from the repo (package scripts, Makefile,
-   CI config, CONTRIBUTING, CLAUDE.md) — never assume them. Run them as you
-   go; do not finish with either failing.
+5. **Implement — with tests.** Read only files relevant to this ticket.
+   Discover the project's lint/test commands from the repo (package
+   scripts, Makefile, CI config, CONTRIBUTING, CLAUDE.md) — never assume
+   them. Run them as you go; do not finish with either failing. Tests
+   follow the repo's lead: if the project already has tests, write tests
+   for the behavior this ticket adds or changes, matching the existing
+   layout and conventions — and only of the kinds already present (a repo
+   with unit tests but no integration tests gets unit tests only, even if
+   criteria cross component boundaries). A behavior change with no test
+   change then needs a one-line why in the PR body. If the project has no
+   tests, skip test writing entirely and note it in the report — don't
+   bootstrap a test setup; that's its own ticket, not a side effect of
+   this one.
 6. **Open a PR** referencing the ticket id in the title, with a summary tied
    to the acceptance criteria. Do NOT merge — merging is a human decision
    that happens outside this workflow.
