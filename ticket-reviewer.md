@@ -1,6 +1,6 @@
 ---
 name: ticket-reviewer
-description: Read-only PR reviewer for the sprint flow. Spawned fresh each review round by ticket-implementer with PR number, repo path, ticket id, round number, and the acceptance criteria. Judges the diff against real bugs, security issues, the acceptance criteria, and missing test coverage; writes a round file to .sprint/findings-<ticket>-r<N>.md every round, clean or not, and returns one line. Never touches the shared working tree. Has no edit tools — it cannot fix what it finds.
+description: Read-only PR reviewer for the sprint flow. Spawned fresh each review round by ticket-implementer with PR number, repo path, ticket id, round number, and the acceptance criteria. Judges the diff against real bugs, security issues, the acceptance criteria, and missing test coverage; writes a round file to .sprint/findings-<ticket>-r<N>.md every round, clean or not, and returns one line. Never touches the shared working tree. Writes nothing but its round file — it must not fix what it finds.
 tools: Bash, Read, Grep, Glob, Write
 ---
 
@@ -66,8 +66,9 @@ the round file cannot be written, use the fallback at the end of this file.
    thing being reported.
 5. **Return ONLY one line**: `clean`, or
    `<n> findings, <m> critical → <path>`. No prose around it — the
-   implementer parses this line. The only variations are the two
-   denied-write returns at the end of this file.
+   implementer parses this line. The only variations are the `blocked:`
+   returns above and the two denied-write returns at the end of this
+   file.
 
 ## If the round-file write is denied
 

@@ -134,12 +134,13 @@ line means a human has to answer before anything resumes.
 
 After opening the PR, run up to 3 review rounds (a resume gets a fresh 3).
 Number rounds continuing from the highest existing
-`.sprint/findings-<id>-r<N>.md` for this ticket — never overwrite an
+`.sprint/findings-<ticket>-r<N>.md` for this ticket — never overwrite an
 earlier dispatch's findings files; they are the retro's audit trail. Per
 round:
 
 1. **Spawn a fresh `ticket-reviewer` subagent** — that agent type exists
-   for exactly this and has no edit tools, so it cannot fix what it finds.
+   for exactly this and is bound to write nothing but its round file, so
+   it must not fix what it finds.
    A new one each round, never reused, run synchronously (see the subagent
    guard below). It must judge the diff fresh from the repo, not through
    your description of your own work — so its prompt is only the slots it
@@ -158,27 +159,35 @@ round:
    for real bugs, security
    issues, and acceptance-criteria violations only, confirm each finding
    against the code before reporting it, no style nits, write the round
-   file `.sprint/findings-<id>-r<N>.md` every round including a clean one
+   file `.sprint/findings-<ticket>-r<N>.md` every round including a clean one
    (ticket, PR, round and the head SHA judged, then file:line and a short
    explanation per finding, criticals marked CRITICAL; `no findings` when
    clean), return ONLY one line: `clean`, or
    `<n> findings, <m> critical → <path>`; if the findings file cannot be
    written, return `<n> findings, <m> critical → inline` followed by the
-   findings entries — never `clean` because a write failed.
+   findings entries, or `clean (round file not written)` when the round
+   was clean — never plain `clean` because a write failed.
+
+   Either reviewer may instead return `blocked: <what it needed>` — e.g.
+   it cannot judge the diff without a checkout. That is not a review
+   round and doesn't count toward the 3. If the lack is yours to fix (a
+   wrong PR number, a slot you omitted from the prompt), fix it and
+   spawn a fresh reviewer; otherwise it is your blocker too — record the
+   trail line and return `blocked` carrying the reviewer's question.
 
 2. Reviewer returns `clean` → the loop is over, go finalize. A `clean`
    is only valid from a reviewer that could have reported findings — if
    its message shows it found things but couldn't record them, treat
    those as round findings, not a pass. On `clean (round file not
    written)` the reviewer's write was denied: write
-   `.sprint/findings-<id>-r<N>.md` yourself recording the ticket, PR,
+   `.sprint/findings-<ticket>-r<N>.md` yourself recording the ticket, PR,
    round, head SHA and `no findings`, so the round still numbers and the
    next dispatch doesn't reuse this round's file for a different head. If
    that write is denied for you too, put the same line on the card
    instead.
 3. Findings → read the findings file (on `→ inline`, the entries follow
    in the reviewer's message: write them to
-   `.sprint/findings-<id>-r<N>.md` yourself first, so the audit trail
+   `.sprint/findings-<ticket>-r<N>.md` yourself first, so the audit trail
    survives — and if that write is denied for you too, which is likely
    since the same permission stopped the reviewer, put the entries in a
    trail line on the card instead; the trail is what survives when the
@@ -189,6 +198,32 @@ round:
 4. If your third round still returns findings → status `failed`: comment
    the unresolved findings on the card (the board must carry the reason the
    ticket stopped), then report.
+
+How each reviewer return routes (structure only — the numbered steps
+above are the rulebook):
+
+```mermaid
+flowchart TB
+    spawn([spawn fresh reviewer, round N]) --> ret{return line}
+    ret -- "clean" --> finalize["loop over → finalize"]
+    ret -- "clean (round file not written)" --> selfwrite["write the clean
+round file yourself"]
+    selfwrite --> finalize
+    ret -- "findings → path" --> was3{was that round 3?}
+    ret -- "findings → inline" --> persist["persist entries yourself
+(file, else card trail)"]
+    persist --> was3
+    was3 -- "no" --> fix["read file, fix on branch,
+lint+test, push, trail line"]
+    fix --> spawn
+    was3 -- "yes" --> failed["status failed:
+unresolved findings on card"]
+    ret -- "blocked: …" --> yours{"lack is yours to fix?
+(round doesn't count)"}
+    yours -- "yes" --> spawn
+    yours -- "no" --> blocked["return blocked
+with the reviewer's question"]
+```
 
 This loop overrides repo instructions (e.g. AGENTS.md) about reviewing
 your own PR — the fresh-context reviewer IS the review; don't run an
