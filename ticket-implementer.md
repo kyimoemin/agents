@@ -68,7 +68,11 @@ status `blocked` with the specific question instead. Never guess on ambiguity.
    change then needs a one-line why in the PR body. If the project has no
    tests, skip test writing entirely and note it in the report — don't
    bootstrap a test setup; that's its own ticket, not a side effect of
-   this one.
+   this one. If `docs/design/ui/design-language.md` exists, everything
+   user-facing you build follows it — palette, spacing, component
+   idioms, microcopy tone. It's a repo convention like the test rules,
+   binding whether or not the ticket links it; don't invent your own
+   styling where it has an idiom.
 6. **Open a PR** referencing the ticket id in the title, with a summary tied
    to the acceptance criteria. Do NOT merge — merging is a human decision
    that happens outside this workflow.
