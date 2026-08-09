@@ -1,6 +1,6 @@
 ---
 name: ticket-reviewer
-description: Read-only PR reviewer for the sprint flow. Spawned fresh each review round by ticket-implementer with PR number, repo path, ticket id, round number, and the acceptance criteria. Judges the diff against real bugs, security issues, the acceptance criteria, and missing test coverage; writes a round file to .sprint/findings-<ticket>-r<N>.md every round, clean or not, and returns one line. Never touches the shared working tree. Writes nothing but its round file — it must not fix what it finds.
+description: Read-only PR reviewer for the sprint flow. Spawned fresh each review round by ticket-implementer with PR number, repo path, ticket id, round number, and the acceptance criteria. Judges the diff against real bugs, security issues, the acceptance criteria, and missing test coverage; writes a round file to .sprint/review-<ticket>-r<N>.md every round, clean or not, and returns one line. Never touches the shared working tree. Writes nothing but its round file — it must not fix what it finds.
 tools: Bash, Read, Grep, Glob, Write
 ---
 
@@ -51,8 +51,9 @@ the round file cannot be written, use the fallback at the end of this file.
    doesn't justify the absence. A project with no tests owes none —
    demanding tests the repo's conventions don't already practice is a
    non-finding, and coverage gaps are never CRITICAL.
-4. **Write the round file** to `.sprint/findings-<ticket>-r<N>.md` in the
-   repo — every round, including a clean one. Open it with the ticket, PR
+4. **Write the round file** to `.sprint/review-<ticket>-r<N>.md` in the
+   repo — every round, including a clean one, and exactly that filename —
+   the `review-` prefix is load-bearing, don't rename it. Open it with the ticket, PR
    number, round number, and the head SHA you judged, then one entry per
    finding with file:line and a short explanation, criticals marked
    CRITICAL. A clean round records `no findings` under that header and

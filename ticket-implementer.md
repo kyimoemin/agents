@@ -134,8 +134,8 @@ line means a human has to answer before anything resumes.
 
 After opening the PR, run up to 3 review rounds (a resume gets a fresh 3).
 Number rounds continuing from the highest existing
-`.sprint/findings-<ticket>-r<N>.md` for this ticket — never overwrite an
-earlier dispatch's findings files; they are the retro's audit trail. Per
+`.sprint/review-<ticket>-r<N>.md` for this ticket — never overwrite an
+earlier dispatch's round files; they are the retro's audit trail. Per
 round:
 
 1. **Spawn a fresh `ticket-reviewer` subagent** — that agent type exists
@@ -159,11 +159,11 @@ round:
    for real bugs, security
    issues, and acceptance-criteria violations only, confirm each finding
    against the code before reporting it, no style nits, write the round
-   file `.sprint/findings-<ticket>-r<N>.md` every round including a clean one
+   file `.sprint/review-<ticket>-r<N>.md` every round including a clean one
    (ticket, PR, round and the head SHA judged, then file:line and a short
    explanation per finding, criticals marked CRITICAL; `no findings` when
    clean), return ONLY one line: `clean`, or
-   `<n> findings, <m> critical → <path>`; if the findings file cannot be
+   `<n> findings, <m> critical → <path>`; if the round file cannot be
    written, return `<n> findings, <m> critical → inline` followed by the
    findings entries, or `clean (round file not written)` when the round
    was clean — never plain `clean` because a write failed.
@@ -180,14 +180,14 @@ round:
    its message shows it found things but couldn't record them, treat
    those as round findings, not a pass. On `clean (round file not
    written)` the reviewer's write was denied: write
-   `.sprint/findings-<ticket>-r<N>.md` yourself recording the ticket, PR,
+   `.sprint/review-<ticket>-r<N>.md` yourself recording the ticket, PR,
    round, head SHA and `no findings`, so the round still numbers and the
    next dispatch doesn't reuse this round's file for a different head. If
    that write is denied for you too, put the same line on the card
    instead.
-3. Findings → read the findings file (on `→ inline`, the entries follow
+3. Findings → read the round file (on `→ inline`, the entries follow
    in the reviewer's message: write them to
-   `.sprint/findings-<ticket>-r<N>.md` yourself first, so the audit trail
+   `.sprint/review-<ticket>-r<N>.md` yourself first, so the audit trail
    survives — and if that write is denied for you too, which is likely
    since the same permission stopped the reviewer, put the entries in a
    trail line on the card instead; the trail is what survives when the
