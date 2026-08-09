@@ -153,11 +153,15 @@ round:
    itself, verified findings only, findings file, one-line return). If the
    `ticket-reviewer` agent type is unavailable, fall back to a
    general-purpose subagent with the same prompt plus the full protocol:
-   fetch the diff with `gh pr diff`, review for real bugs, security
+   fetch the diff with `gh pr diff` and read files in place, never
+   changing branches or otherwise touching the shared working tree, review
+   for real bugs, security
    issues, and acceptance-criteria violations only, confirm each finding
-   against the code before reporting it, no style nits, write findings to
-   `.sprint/findings-<id>-r<N>.md` (file:line and a short explanation per
-   finding, criticals marked CRITICAL), return ONLY one line: `clean`, or
+   against the code before reporting it, no style nits, write the round
+   file `.sprint/findings-<id>-r<N>.md` every round including a clean one
+   (ticket, PR, round and the head SHA judged, then file:line and a short
+   explanation per finding, criticals marked CRITICAL; `no findings` when
+   clean), return ONLY one line: `clean`, or
    `<n> findings, <m> critical → <path>`; if the findings file cannot be
    written, return `<n> findings, <m> critical → inline` followed by the
    findings entries — never `clean` because a write failed.
@@ -165,7 +169,13 @@ round:
 2. Reviewer returns `clean` → the loop is over, go finalize. A `clean`
    is only valid from a reviewer that could have reported findings — if
    its message shows it found things but couldn't record them, treat
-   those as round findings, not a pass.
+   those as round findings, not a pass. On `clean (round file not
+   written)` the reviewer's write was denied: write
+   `.sprint/findings-<id>-r<N>.md` yourself recording the ticket, PR,
+   round, head SHA and `no findings`, so the round still numbers and the
+   next dispatch doesn't reuse this round's file for a different head. If
+   that write is denied for you too, put the same line on the card
+   instead.
 3. Findings → read the findings file (on `→ inline`, the entries follow
    in the reviewer's message: write them to
    `.sprint/findings-<id>-r<N>.md` yourself first, so the audit trail
