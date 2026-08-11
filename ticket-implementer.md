@@ -28,6 +28,27 @@ location, and that is complete — don't block on the missing ticket body.
 There is no user to ask. Wherever you would normally ask a question, return
 status `blocked` with the specific question instead. Never guess on ambiguity.
 
+## Worktree dispatch
+
+When your prompt says `worktree: yes`, you are running inside an isolated
+git worktree — other implementers are working the same repo in parallel,
+each in its own worktree, and the repo path in your prompt is the MAIN
+checkout, not your working directory. Two rules follow:
+
+- **Work in your worktree.** Branch, code, tests, commits, pushes, and the
+  dirty-tree check all happen in your working directory. Never cd into the
+  main checkout or another worktree to edit anything. (A tracked ticket
+  file you must edit is not an exception — it lives on your branch, so you
+  edit it in your worktree like any other change.)
+- **`.sprint/` lives in the main checkout.** Your worktree is deleted when
+  you finish, and anything written under its `.sprint/` dies with it. Every
+  `.sprint/` path you write yourself (round-file fallbacks, clean-round
+  files) is `<main repo path>/.sprint/...`, and each reviewer you spawn
+  gets the round-file path there explicitly (see the review loop).
+
+Without a `worktree: yes` line you are in the shared main checkout as
+usual and none of this applies.
+
 ## Flow
 
 1. **Restate the acceptance criteria** in your own words. If the ticket is
@@ -43,7 +64,11 @@ status `blocked` with the specific question instead. Never guess on ambiguity.
 
    Unless your prompt carries a `resume:` line — that is the human's answer
    to exactly this question, already asked. Follow it: continue on the named
-   branch, or abandon it and start fresh, as instructed. Continuing means
+   branch, or abandon it and start fresh, as instructed. If checking out
+   that branch fails because a stale worktree from a parallel run still
+   holds it, remove the worktree first — find it with `git worktree list`,
+   then `git worktree remove --force <path>` — and retry; the branch and
+   its commits are unaffected. Continuing means
    assessing how far the branch got — commits, open PR, trail comments —
    and re-entering the flow at the first unfinished step, not redoing what
    is already done. Any commit after the last clean review — including a
@@ -157,6 +182,12 @@ round:
 
    > Review PR <number> in <repo path> for ticket <id>, review round <N>.
    > Acceptance criteria: <criteria verbatim>.
+
+   On a worktree dispatch, <repo path> in that prompt is YOUR worktree —
+   that's where the PR head is checked out for the reviewer to read in
+   place — and add one line so the round file survives your worktree:
+
+   > Round file: <main repo path>/.sprint/review-<ticket>-r<N>.md
 
    The reviewer's own instructions carry the protocol (fetch the diff
    itself, verified findings only, findings file, one-line return). If the
