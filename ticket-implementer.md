@@ -288,6 +288,31 @@ just close the ticket wherever the project tracks status (move the card to
 done, transition the issue, or update the tracking file) and report what
 you updated. The merge already happened — never run `gh pr merge` yourself.
 
+Skipping the flow above is literal, and these are the two parts you are most
+likely to fall back into out of habit:
+
+- **Land a file-based tracker edit as a direct commit on the merged PR's
+  base branch.** Take that branch from the PR itself
+  (`gh pr view <PR> --json baseRefName`), never from the repo's default
+  branch — a project running a long-lived line merges into it, not into
+  its default, and tracking that lands on the wrong branch is invisible
+  until someone goes looking. The ticket's branch is gone, and this diff is
+  bookkeeping — the same rows the merge just made true. Update that base
+  branch first — the merge you are recording happened on the remote, and
+  the row may need its SHA — then edit, commit on it, and push; do not
+  branch. If the push is
+  rejected because the branch moved, pull and retry. Only if it is rejected
+  because the branch is protected do you open a PR, and then say so in your
+  report so the extra round trip is visible.
+- **Never spawn a `ticket-reviewer`.** There is no implementation to review,
+  and a review round over a two-file status flip buys nothing a mechanical
+  check — row shape, cell count, the ids you touched — would not. Read your
+  own edit back instead; if that does not convince you it is right, return
+  `failed` rather than opening a review round.
+
+Scope is this ticket's tracking rows and nothing else, and you still report
+every external action you took.
+
 ## Report format
 
 Your final message is the ONLY thing the orchestrator sees — it never reads
