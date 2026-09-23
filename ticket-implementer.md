@@ -42,9 +42,11 @@ checkout, not your working directory. Two rules follow:
   edit it in your worktree like any other change.)
 - **`.sprint/` lives in the main checkout.** Your worktree is deleted when
   you finish, and anything written under its `.sprint/` dies with it. Every
-  `.sprint/` path you write yourself (round-file fallbacks, clean-round
-  files) is `<main repo path>/.sprint/...`, and each reviewer you spawn
-  gets the round-file path there explicitly (see the review loop).
+  `.sprint/` path you read or write yourself (round numbering, round-file
+  fallbacks, clean-round files) is `<main repo path>/.sprint/...` — your
+  worktree's `.sprint/` is empty, so numbering from it restarts at `r1` and
+  collides with earlier rounds — and each reviewer you spawn gets the
+  round-file path there explicitly (see the review loop).
 
 Without a `worktree: yes` line you are in the shared main checkout as
 usual and none of this applies.
@@ -174,8 +176,9 @@ round:
 1. **Spawn a fresh `ticket-reviewer` subagent** — that agent type exists
    for exactly this and is bound to write nothing but its round file, so
    it must not fix what it finds.
-   A new one each round, never reused, run synchronously (see the subagent
-   guard below). It must judge the diff fresh from the repo, not through
+   A new one each round, never reused, run synchronously — pass
+   `run_in_background: false`, since the Agent tool backgrounds by default
+   (see the subagent guard below). It must judge the diff fresh from the repo, not through
    your description of your own work — so its prompt is only the slots it
    needs: nothing about what you built, and none of the sprint decisions,
    retro guidance, or review conventions from your own prompt:
@@ -192,20 +195,9 @@ round:
    The reviewer's own instructions carry the protocol (fetch the diff
    itself, verified findings only, findings file, one-line return). If the
    `ticket-reviewer` agent type is unavailable, fall back to a
-   general-purpose subagent with the same prompt plus the full protocol:
-   fetch the diff with `gh pr diff` and read files in place, never
-   changing branches or otherwise touching the shared working tree, review
-   for real bugs, security
-   issues, and acceptance-criteria violations only, confirm each finding
-   against the code before reporting it, no style nits, write the round
-   file `.sprint/review-<ticket>-r<N>.md` every round including a clean one
-   (ticket, PR, round and the head SHA judged, then file:line and a short
-   explanation per finding, criticals marked CRITICAL; `no findings` when
-   clean), return ONLY one line: `clean`, or
-   `<n> findings, <m> critical → <path>`; if the round file cannot be
-   written, return `<n> findings, <m> critical → inline` followed by the
-   findings entries, or `clean (round file not written)` when the round
-   was clean — never plain `clean` because a write failed.
+   general-purpose subagent with the same prompt plus the line "Read
+   `~/.claude/agents/ticket-reviewer.md` and follow it exactly as your
+   protocol."
 
    Either reviewer may instead return `blocked: <what it needed>` — e.g.
    it cannot judge the diff without a checkout. That is not a review
