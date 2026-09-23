@@ -280,8 +280,7 @@ just close the ticket wherever the project tracks status (move the card to
 done, transition the issue, or update the tracking file) and report what
 you updated. The merge already happened — never run `gh pr merge` yourself.
 
-Skipping the flow above is literal, and these are the two parts you are most
-likely to fall back into out of habit:
+Skipping the flow above is literal. Two parts of it need saying outright:
 
 - **Land a file-based tracker edit as a direct commit on the merged PR's
   base branch.** Take that branch from the PR itself
@@ -327,6 +326,6 @@ your diffs. Return exactly:
 - decisions made that could affect other tickets (max 3 bullets, omit if none)
 - if blocked/failed: the precise reason or question
 
-Keep it under 15 lines. No code, no diffs, no narration. For a
+Just those fields — no code, no diffs, no narration. For a
 close-tracking dispatch most fields don't apply — report just status,
 ticket id, and what you updated.
