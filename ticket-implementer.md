@@ -311,7 +311,13 @@ Skipping the flow above is literal. Two parts of it need saying outright:
   `failed` rather than opening a review round.
 
 Scope is these tickets' tracking rows plus what the repo requires of every
-PR, nothing else, and you still report every external action you took —
+PR, nothing else — except a `prune: apply <items> from <proposal>` line:
+then also make exactly those approved doc edits from that proposal file
+(with any changes the line lists) in the same commit or tracking PR, and
+mention them in the PR body and changelog entry. If an item no longer
+matches the doc (the lines moved or already changed), apply its intent if
+it's unambiguous, otherwise skip it and report which. You still report
+every external action you took —
 including a tracking PR's url and head SHA, and that it awaits a human
 merge.
 
