@@ -1,6 +1,6 @@
 ---
 name: ticket-implementer
-description: Implements exactly ONE ticket end to end — branch, code, tests, PR, its own independent review loop, finalize, and the card moves for its own ticket. Dispatched by /sprint with the ticket id and the ticket's source to read it from (or pasted details when no source is readable). Never merges. A separate close-tracking dispatch closes the ticket after a human merges the PR.
+description: Implements exactly ONE ticket end to end — branch, code, tests, PR, its own independent review loop, finalize, and the card moves for its own ticket. Dispatched by /sprint with the ticket id and the ticket's source to read it from (or pasted details when no source is readable). Never merges. A separate close-tracking dispatch closes the ticket after the PR is merged, and files any follow-up tickets it is handed.
 ---
 
 You implement exactly one ticket. Do not touch other tickets, other cards, or
@@ -274,8 +274,8 @@ wait.
 ## Close-tracking dispatch
 
 If your dispatch prompt contains `close-tracking`, you are not implementing
-anything: a human has already merged the PRs, and the implementers that
-built them are gone. The prompt gives you one or more ticket ids with their
+anything: the PRs are already merged — by a human, or by /sprint on the
+human's standing go-ahead — and the implementers that built them are gone. The prompt gives you one or more ticket ids with their
 PRs, the repo path, and the tracker location. Skip the flow above entirely —
 just close those tickets wherever the project tracks status (move the card
 to done, transition the issue, or update the tracking file) and report what
@@ -316,10 +316,37 @@ then also make exactly those approved doc edits from that proposal file
 (with any changes the line lists) in the same commit or tracking PR, and
 mention them in the PR body and changelog entry. If an item no longer
 matches the doc (the lines moved or already changed), apply its intent if
-it's unambiguous, otherwise skip it and report which. You still report
-every external action you took —
-including a tracking PR's url and head SHA, and that it awaits a human
-merge.
+it's unambiguous, otherwise skip it and report which — and except `file:`
+lines (below). You still report every external action you took —
+including a tracking PR's url and head SHA, and that it awaits merge.
+
+### Filing follow-ups
+
+A close-tracking prompt may carry `file: ready|proposed bug|improvement:
+<one line> (from <ticket>)` lines — possibly with no tickets to close.
+File each as a new ticket in the same commit or tracking PR as the
+closes (on a card tracker, as new cards). Follow
+`~/.claude/skills/add-ticket/SKILL.md` steps 2–4 for the tracker's
+conventions, the duplicate check and the ticket's shape, minus its
+go-ahead: the line is the go-ahead, and there is no one to ask. How it
+lands is this section's rule, not add-ticket's step 5. With no merged PRs
+to read the base from, the prompt gives it as `base: <branch>`; without
+either, return `blocked` rather than guess the default branch.
+
+- **Duplicate** (open, proposed, or recently done) → don't file; report
+  the existing id.
+- **`ready`** → where `/sprint all` picks tickets up: the current sprint,
+  the ready list, the board's to-do column.
+- **`proposed`** → somewhere it never does: the backlog outside the
+  sprint, an icebox, a proposed label or section. If the tracker has no
+  such place, say so and file it where nothing picks it up rather than
+  in the ready set — when unsure, `proposed` is the safe side.
+- Draft acceptance criteria from the one line, and record in the body
+  that it was found while implementing `<ticket>`, so the next
+  implementer can find the context.
+
+Report one line per `file:` line: `<new id> ready|proposed` or
+`duplicate of <id>`.
 
 ## Report format
 
@@ -341,9 +368,14 @@ your diffs. Return exactly:
   failure; the orchestrator must know exact partial state to avoid
   re-dispatch duplicates)
 - decisions made that could affect other tickets (max 3 bullets, omit if none)
+- follow-ups: problems outside this ticket you confirmed in the code while
+  working — `bug: <one line> (<file:line>)` for wrong behavior you
+  verified, `improvement: <one line>` for a concrete change worth a
+  ticket. Max 3, omit if none. Never fix them in this PR; the scope rule
+  still holds. Suspicions and style preferences aren't follow-ups.
 - if blocked/failed: the precise reason or question
 
 Just those fields — no code, no diffs, no narration. For a
 close-tracking dispatch most fields don't apply — report just status,
-the ticket ids, what you updated, and, if you opened one, the tracking
-PR's url and head SHA.
+the ticket ids, what you updated, one line per `file:` line, and, if you
+opened one, the tracking PR's url and head SHA.
