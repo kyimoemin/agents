@@ -171,7 +171,7 @@ line means a human has to answer before anything resumes.
 After opening the PR, run up to 3 review rounds (a resume gets a fresh 3).
 Number rounds continuing from the highest existing
 `.sprint/review-<ticket>-r<N>.md` for this ticket — never overwrite an
-earlier dispatch's round files; they are the retro's audit trail. Per
+earlier dispatch's round files; they are the review audit trail. Per
 round:
 
 1. **Spawn a fresh `ticket-reviewer` subagent** — that agent type exists
@@ -181,8 +181,8 @@ round:
    `run_in_background: false`, since the Agent tool backgrounds by default
    (see the subagent guard below). It must judge the diff fresh from the repo, not through
    your description of your own work — so its prompt is only the slots it
-   needs: nothing about what you built, and none of the sprint decisions,
-   retro guidance, or review conventions from your own prompt:
+   needs: nothing about what you built, and none of the sprint decisions
+   or review conventions from your own prompt:
 
    > Review PR <number> in <repo path> for ticket <id>, review round <N>.
    > Acceptance criteria: <criteria verbatim>.
