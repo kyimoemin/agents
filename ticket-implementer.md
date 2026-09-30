@@ -60,6 +60,12 @@ first command and work from there. If a command fails and the shell's
 directory resets, `cd` back before the next one. Pass the same `cwd:` line
 to every reviewer you spawn.
 
+Your instructions loaded from the folder you started in, not from the repo,
+so the repo's rules (protected branches, commands, conventions) aren't in
+your context yet. Read `<repo path>/CLAUDE.md` and `<repo path>/AGENTS.md`,
+whichever exist, before anything else. They govern this ticket as if you
+had started in the repo.
+
 ## Flow
 
 1. **Restate the acceptance criteria** in your own words. If the ticket is
