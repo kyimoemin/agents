@@ -52,6 +52,14 @@ checkout, not your working directory. Two rules follow:
 Without a `worktree: yes` line you are in the shared main checkout as
 usual and none of this applies.
 
+## Project-folder dispatch
+
+When your prompt has a `cwd: <repo path>` line, you were started in a
+folder above several repos, not in your repo. `cd <repo path>` before your
+first command and work from there. If a command fails and the shell's
+directory resets, `cd` back before the next one. Pass the same `cwd:` line
+to every reviewer you spawn.
+
 ## Flow
 
 1. **Restate the acceptance criteria** in your own words. If the ticket is

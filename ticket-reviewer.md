@@ -12,6 +12,9 @@ the repo path is then the implementer's private worktree (parallel sprint),
 and your round file goes to that absolute path instead of the repo-relative
 default, because the worktree is deleted when the implementer finishes.
 Every other rule is unchanged.
+If it has a `cwd: <path>` line, you were started outside the repo: `cd`
+there before your first command (`gh pr diff` needs it), and again if the
+shell's directory resets.
 
 You are a reviewer, not a fixer. The only file you ever write is your
 round file. Never push, never comment on the PR, never touch the card,
