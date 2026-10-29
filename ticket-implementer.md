@@ -34,20 +34,17 @@ status `blocked` with the specific question instead. Never guess on ambiguity.
 When your prompt says `worktree: yes`, you are running inside an isolated
 git worktree — other implementers are working the same repo in parallel,
 each in its own worktree, and the repo path in your prompt is the MAIN
-checkout, not your working directory. Two rules follow:
+checkout, not your working directory. One rule follows:
 
 - **Work in your worktree.** Branch, code, tests, commits, pushes, and the
   dirty-tree check all happen in your working directory. Never cd into the
   main checkout or another worktree to edit anything. (A tracked ticket
   file you must edit is not an exception — it lives on your branch, so you
   edit it in your worktree like any other change.)
-- **`.sprint/` lives in the main checkout.** Your worktree is deleted when
-  you finish, and anything written under its `.sprint/` dies with it. Every
-  `.sprint/` path you read or write yourself (round numbering, round-file
-  fallbacks, clean-round files) is `<main repo path>/.sprint/...` — your
-  worktree's `.sprint/` is empty, so numbering from it restarts at `r1` and
-  collides with earlier rounds — and each reviewer you spawn gets the
-  round-file path there explicitly (see the review loop).
+- **Write nothing under `.sprint/`.** It lives in the main checkout, and
+  your worktree's copy is deleted with the worktree. The review record goes
+  on the PR (see the review loop), which survives because it is on GitHub,
+  not on disk.
 
 Without a `worktree: yes` line you are in the shared main checkout as
 usual and none of this applies.
@@ -165,10 +162,9 @@ it.
 
 **Leave a trail as you go.** If you are terminated mid-ticket, nobody gets a
 report — the tracker is all that survives. Record one line the moment each
-of these becomes true: branch created (name), PR opened (url), review round
-fixed and pushed, review clean → finalized (head SHA), and — whenever you
-return `blocked` or `failed` — the
-precise question or reason. As it happens, never batched to the end. Where
+of these becomes true: branch created (name), PR opened (url), review clean
+→ finalized (head SHA), and — whenever you return `blocked` or `failed` — the precise question or
+reason. As it happens, never batched to the end. Where
 that line goes depends on the tracker: a comment on the card or issue if it
 supports them, otherwise appended to the ticket's entry in whatever file
 holds it. If tracking is a file you must commit to make visible, batch those
@@ -183,14 +179,14 @@ line means a human has to answer before anything resumes.
 ## Review loop
 
 After opening the PR, run up to 3 review rounds (a resume gets a fresh 3).
-Number rounds continuing from the highest existing
-`.sprint/review-<ticket>-r<N>.md` for this ticket — never overwrite an
-earlier dispatch's round files; they are the review audit trail. Per
-round:
+Number rounds continuing from the highest `**Review round <N>**` comment
+already on the PR (`gh pr view <number> --comments`) — an earlier
+dispatch's rounds keep their numbers, and those comments are the review
+audit trail. A fresh PR starts at round 1. Per round:
 
 1. **Spawn a fresh `ticket-reviewer` subagent** — that agent type exists
-   for exactly this and is bound to write nothing but its round file, so
-   it must not fix what it finds.
+   for exactly this and is bound to write nothing, so it must not fix what
+   it finds.
    A new one each round, never reused, run synchronously — pass
    `run_in_background: false`, since the Agent tool backgrounds by default
    (see the subagent guard below). It must judge the diff fresh from the repo, not through
@@ -203,13 +199,12 @@ round:
 
    On a worktree dispatch, <repo path> in that prompt is YOUR worktree —
    that's where the PR head is checked out for the reviewer to read in
-   place — and add one line so the round file survives your worktree:
-
-   > Round file: <main repo path>/.sprint/review-<ticket>-r<N>.md
+   place.
 
    The reviewer's own instructions carry the protocol (fetch the diff
-   itself, verified findings only, findings file, one-line return). If the
-   `ticket-reviewer` agent type is unavailable, fall back to a
+   itself, verified findings only, one PR comment per round, verdict and
+   findings returned inline).
+   If the `ticket-reviewer` agent type is unavailable, fall back to a
    general-purpose subagent with the same prompt plus the line "Read
    `~/.claude/agents/ticket-reviewer.md` and follow it exactly as your
    protocol."
@@ -221,25 +216,18 @@ round:
    spawn a fresh reviewer; otherwise it is your blocker too — record the
    trail line and return `blocked` carrying the reviewer's question.
 
-2. Reviewer returns `clean` → the loop is over, go finalize. A `clean`
+2. **Make sure the round is on the PR.** The reviewer's PR comment is
+   the round's only record, and what numbers the next round. If its first
+   line ends ` (comment not posted)`, post that comment yourself with
+   `gh pr comment`, in the reviewer's format, from the entries it
+   returned. Don't add a trail line per round; the ticket trail keeps
+   milestones only.
+3. Reviewer returns `clean` → the loop is over, go finalize. A `clean`
    is only valid from a reviewer that could have reported findings — if
-   its message shows it found things but couldn't record them, treat
-   those as round findings, not a pass. On `clean (round file not
-   written)` the reviewer's write was denied: write
-   `.sprint/review-<ticket>-r<N>.md` yourself recording the ticket, PR,
-   round, head SHA and `no findings`, so the round still numbers and the
-   next dispatch doesn't reuse this round's file for a different head. If
-   that write is denied for you too, put the same line on the card
-   instead.
-3. Findings → read the round file (on `→ inline`, the entries follow
-   in the reviewer's message: write them to
-   `.sprint/review-<ticket>-r<N>.md` yourself first, so the audit trail
-   survives — and if that write is denied for you too, which is likely
-   since the same permission stopped the reviewer, put the entries in a
-   trail line on the card instead; the trail is what survives when the
-   repo won't take the file), fix them on the same branch, re-run
-   lint and tests, push, record a trail line, and start the next round. If
-   you believe a finding is wrong, don't silently skip it — note the
+   its message shows it found things but couldn't report them, treat
+   those as round findings, not a pass. Findings → fix them on the same
+   branch, re-run lint and tests, push, and start the next round. If you
+   believe a finding is wrong, don't silently skip it — note the
    disagreement in your report.
 4. If your third round still returns findings → status `failed`: comment
    the unresolved findings on the card (the board must carry the reason the
@@ -251,16 +239,13 @@ above are the rulebook):
 ```mermaid
 flowchart TB
     spawn([spawn fresh reviewer, round N]) --> ret{return line}
-    ret -- "clean" --> finalize["loop over → finalize"]
-    ret -- "clean (round file not written)" --> selfwrite["write the clean
-round file yourself"]
-    selfwrite --> finalize
-    ret -- "findings → path" --> was3{was that round 3?}
-    ret -- "findings → inline" --> persist["persist entries yourself
-(file, else card trail)"]
-    persist --> was3
-    was3 -- "no" --> fix["read file, fix on branch,
-lint+test, push, trail line"]
+    ret -- "… (comment not posted)" --> post["post the round
+comment yourself"]
+    post --> ret
+    ret -- "clean @ sha" --> finalize["loop over → finalize"]
+    ret -- "findings @ sha" --> was3{was that round 3?}
+    was3 -- "no" --> fix["fix on branch,
+lint+test, push"]
     fix --> spawn
     was3 -- "yes" --> failed["status failed:
 unresolved findings on card"]
