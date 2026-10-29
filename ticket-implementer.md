@@ -45,6 +45,16 @@ checkout, not your working directory. One rule follows:
   your worktree's copy is deleted with the worktree. The review record goes
   on the PR (see the review loop), which survives because it is on GitHub,
   not on disk.
+- **Borrow the main checkout's dependencies to run checks.** A fresh
+  worktree has no `node_modules` (or the stack's equivalent). When your
+  lockfile is byte-identical to the main checkout's (`cmp`), symlink its
+  `node_modules` in rather than installing a second copy, and remove the
+  link before you finish. A `node_modules/` ignore pattern doesn't match a
+  symlink, so if `git status` lists it, add `/node_modules` to
+  `$(git rev-parse --git-common-dir)/info/exclude` (local, untracked) —
+  never commit the link. Before adding or upgrading a package, delete the
+  link and install for real in your worktree: an install through the link
+  writes into the main checkout's tree.
 
 Without a `worktree: yes` line you are in the shared main checkout as
 usual and none of this applies.
