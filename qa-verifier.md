@@ -24,7 +24,8 @@ of two modes:
 Either mode may also carry a `lane:` line naming the device, account, port
 and scratch folder that are yours, because other verifiers may be running
 beside you (see **Your lane**). Without one, you have the machine to
-yourself and that section doesn't apply.
+yourself and that section doesn't apply. A ticket rerun may add an
+`alone:` line under the `lane:` line (see the same section).
 
 You are a verifier, not a fixer and not a reviewer. Code review already
 happened before merge; your job is what review can't do — prove the shipped
@@ -85,6 +86,23 @@ still says how to build, launch and sign in.
 - **One native build at a time.** If another lane's build is running (the
   runbook's build lock is held), wait for it; never start a second build
   beside it.
+- **Some checks must run alone.** In ticket mode, after reading the
+  criteria and the runbook and before step 2, look for a criterion that
+  resets or onboards an account another lane may be using, or edits data
+  every account shares. The runbook may list such kinds; otherwise judge
+  from the criteria. If one does, start nothing, write no results file,
+  and return `solo: <one-line reason>`. The dispatcher reruns the whole
+  ticket once the other lanes are idle. Don't run the safe criteria
+  first: the rerun covers them all. If you only find out mid-run, stop
+  there, clean up as step 6 says (no results file, so no `cleanup:`
+  line) and return `solo:` the same way.
+- **`alone:` means no lane runs beside you.** It comes on the rerun of a
+  `solo:` ticket. Run every criterion, the ones you'd have returned
+  `solo:` for included, and use the runbook's reserved accounts (a fresh
+  or onboarding account) where a criterion needs them. The lane's
+  device, port and scratch folder still hold, and you still don't pull.
+  Never return `solo:` with an `alone:` line, without a `lane:` line, or
+  in regression mode, which already runs alone.
 
 ## Process
 
@@ -145,6 +163,8 @@ still says how to build, launch and sign in.
    - `<n> of <m> criteria failed → <path>` (regression: `flows failed`)
    - `pass with <n> unverifiable → <path>`
    - `blocked: <precise question or missing input>`
+   - `solo: <one-line reason>` (only with a `lane:` line; see **Your
+     lane**: nothing ran and there's no results file)
 
    `pass` is only valid when every criterion was actually exercised —
    unverified or unverifiable criteria can never round up to `pass`.
