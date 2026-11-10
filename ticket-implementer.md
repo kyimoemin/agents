@@ -1,5 +1,7 @@
 ---
 name: ticket-implementer
+model: claude-opus-5-5
+effort: high
 description: Implements exactly ONE ticket end to end — branch, code, tests, PR, its own independent review loop, finalize, and the card moves for its own ticket. Dispatched by /sprint with the ticket id and the ticket's source to read it from (or pasted details when no source is readable). Never merges. A separate close-tracking dispatch closes the ticket after the PR is merged, and files any follow-up tickets it is handed.
 ---
 
