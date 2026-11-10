@@ -336,11 +336,12 @@ including a tracking PR's url and head SHA, and that it awaits merge.
 A close-tracking prompt may carry `file: ready|proposed bug|improvement:
 <one line> (from <ticket>)` lines — possibly with no tickets to close.
 File each as a new ticket in the same commit or tracking PR as the
-closes (on a card tracker, as new cards). Follow
-`~/.claude/skills/add-ticket/SKILL.md` steps 2–4 for the tracker's
-conventions, the duplicate check and the ticket's shape, minus its
-go-ahead: the line is the go-ahead, and there is no one to ask. How it
-lands is this section's rule, not add-ticket's step 5. With no merged PRs
+closes (on a card tracker, as new cards). Follow three steps of
+`~/.claude/skills/add-ticket/SKILL.md`, found by name, not number —
+"Discover the tracker and its conventions", "Check for duplicates" and
+"Draft" — minus the go-ahead: the line is the go-ahead, and there is no
+one to ask. How it lands is this section's rule, not add-ticket's
+"File it" step. With no merged PRs
 to read the base from, the prompt gives it as `base: <branch>`; without
 either, return `blocked` rather than guess the default branch.
 
