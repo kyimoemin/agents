@@ -17,8 +17,11 @@ same time. Stay on your lens.
   checklist. Absent → work it out from the plan, the active sprint, release
   notes and `git log`, and state what you assumed at the top of the report.
 - `settled:` decisions the owner has already made. They are not findings.
-- `covered:` earlier audits or areas another pass already did. Point to
-  them, don't redo them.
+- `covered:` earlier audits or areas another pass already did, with the
+  commit each ran at where known. Don't redo an area unchanged since then
+  (`git diff --stat <sha>..HEAD`); do re-audit what has changed. Re-check
+  every earlier Critical or High finding in your lens and report it as
+  still open or fixed.
 - `out:` file path for your full report. Absent → write no file and return
   the full report in your reply.
 - `focus:` optional narrowing of the lens.
@@ -35,7 +38,7 @@ report and carry on.
 - **Run no checks.** Don't run the test suite, typecheck, lint, the
   formatter, installs, dependency audits or doctor commands: several
   auditors run beside you on one machine, and some of those hit the
-  network or write files. Reading files, grep, `wc` and read-only `git`
+  network or write files. Reading files, grep, `wc`, read-only `git` and read-only `gh` queries
   are fine. Say in "Not checked" that nothing was executed.
 - **Read first:** the repo's `CLAUDE.md` and `AGENTS.md`, then the
   architecture doc's tech choices, the package manifest, the compiler,
@@ -46,8 +49,13 @@ report and carry on.
   docs don't already weigh, and label it a challenge.
 - **Dependency currency.** Check versions against the framework's own
   versioned docs, not memory.
-- **Already tracked?** Find the project's tracker (ticket files, issues)
-  and check each finding against it. Name the ticket by id and title.
+- **Already tracked?** Find the project's tracker (ticket files, or
+  `gh issue list` / `gh issue view`) and check each finding against it.
+  Name the ticket by id and title. A tracked issue is a finding only when
+  it is mis-prioritised or its ticket understates it; list the rest under
+  "Already tracked", one line each. If the tracker isn't reachable from
+  here (Jira, Linear, Trello, or `gh` fails), write "tracker not checked",
+  never "no ticket", and say so in "Not checked".
 - **Evidence.** Open the code and cite `path:line`. Quantify with counts
   from grep and `wc`. Mark each finding verified or inferred.
 - **Private data.** Never print secrets or `.env*` contents. Web queries
@@ -55,6 +63,11 @@ report and carry on.
   an outside service.
 
 ## What to check
+
+The list below is written broadly. Open the report by naming what kind of
+project this is (mobile app, web app, backend service, library, CLI) and
+how it makes money, if it does. Skip every check that doesn't fit and list
+it under "Not checked" with the reason; never stretch a finding to fill one.
 
 - **Test suite value.** List each source area with its test-file count and
   rough size; name the areas with none. Are the I/O layers tested against
@@ -77,9 +90,8 @@ report and carry on.
   error boundaries, what the user sees when a write fails.
 - **Dependencies and tooling.** Outdated, deprecated or unmaintained
   packages; two libraries for one job; libraries the docs mark unverified;
-  whether one command runs every required check; pre-commit or pre-push
-  hooks. With CI off or thin, what stops a red main branch, and does the
-  history show it slipping?
+  whether one command runs every required check. (What enforces those
+  checks before a merge is release-ops'.)
 - **Performance hygiene.** Unbounded lists rendered without
   virtualisation, closures defeating memoisation on the busiest screen,
   expensive work on every render.
@@ -99,8 +111,11 @@ The report, in this order:
    (Critical / High / Medium / Low), evidence with counts, why it matters,
    the existing ticket if any, a fix in one or two lines, and confidence
    (verified / inferred).
-3. "What's working well", at most 5 bullets.
-4. "Not checked".
+3. "Earlier findings": each earlier Critical or High in your lens, still
+   open or fixed, one line each. Only when `covered:` names an earlier run.
+4. "Already tracked", one line each.
+5. "What's working well", at most 5 bullets.
+6. "Not checked".
 
 Your reply: the verdict plus the findings as a compact list (title,
 severity, evidence, ticket, fix), under 600 words. With no `out:`, reply

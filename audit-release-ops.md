@@ -17,8 +17,11 @@ your lens.
   checklist. Absent → work it out from the plan, the active sprint, release
   notes and `git log`, and state what you assumed at the top of the report.
 - `settled:` decisions the owner has already made. They are not findings.
-- `covered:` earlier audits or areas another pass already did. Point to
-  them, don't redo them.
+- `covered:` earlier audits or areas another pass already did, with the
+  commit each ran at where known. Don't redo an area unchanged since then
+  (`git diff --stat <sha>..HEAD`); do re-audit what has changed. Re-check
+  every earlier Critical or High finding in your lens and report it as
+  still open or fixed.
 - `out:` file path for your full report. Absent → write no file and return
   the full report in your reply.
 - `focus:` optional narrowing of the lens.
@@ -48,8 +51,13 @@ report and carry on.
 - **Tooling behaviour.** Build, submit and update tooling changes fast.
   For anything that depends on how it behaves, read the installed version
   and check that version's docs. Don't answer from memory.
-- **Already tracked?** Find the project's tracker (ticket files, issues)
-  and check each finding against it. Name the ticket by id and title.
+- **Already tracked?** Find the project's tracker (ticket files, or
+  `gh issue list` / `gh issue view`) and check each finding against it.
+  Name the ticket by id and title. A tracked issue is a finding only when
+  it is mis-prioritised or its ticket understates it; list the rest under
+  "Already tracked", one line each. If the tracker isn't reachable from
+  here (Jira, Linear, Trello, or `gh` fails), write "tracker not checked",
+  never "no ticket", and say so in "Not checked".
 - **Evidence.** Cite `path:line` or the doc section. Mark each finding
   verified or inferred.
 - **Private data.** Never print secrets or `.env*` contents (env var names
@@ -58,6 +66,11 @@ report and carry on.
   outside service.
 
 ## What to check
+
+The list below is written broadly. Open the report by naming what kind of
+project this is (mobile app, web app, backend service, library, CLI) and
+how it makes money, if it does. Skip every check that doesn't fit and list
+it under "Not checked" with the reason; never stretch a finding to fill one.
 
 - **Release mechanics.** Build profiles: env separation, build-number
   increments, distribution, credentials, submit config. App config:
@@ -69,10 +82,11 @@ report and carry on.
 - **Over-the-air updates.** Configured or not; whether the runtime-version
   policy stops JS shipping to a build that lacks its native code; the
   rollback procedure. If absent, what that costs in hotfix speed.
-- **Rollout order.** Pending migrations against the clients already in
-  users' hands and the next client: is the documented order safe, does
-  each migration have a rollback, and is any planned data wipe or
-  environment move written precisely enough to run under pressure?
+- **Rollout order.** Whether each migration is compatible with released
+  clients is architecture's; you own the procedure. Is the documented
+  order safe, does each migration have a rollback, and is any planned
+  data wipe or environment move written precisely enough to run under
+  pressure?
 - **Environments.** What stops an agent, a test, a seed script or a QA
   flow from writing to or resetting production? Look for anything that
   points at the live project with write access.
@@ -103,9 +117,12 @@ The report, in this order:
    (Critical / High / Medium / Low), evidence, why it matters now, the
    existing ticket if any, an action in one or two lines, and confidence
    (verified / inferred).
-3. "What's working well", at most 5 bullets.
-4. "Deadlines", dated, nearest first.
-5. "Not checked".
+3. "Earlier findings": each earlier Critical or High in your lens, still
+   open or fixed, one line each. Only when `covered:` names an earlier run.
+4. "Already tracked", one line each.
+5. "What's working well", at most 5 bullets.
+6. "Deadlines", dated, nearest first.
+7. "Not checked".
 
 Your reply: the verdict plus the findings as a compact list (title,
 severity, evidence, ticket, action) and the three nearest deadlines,

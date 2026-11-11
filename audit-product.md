@@ -16,8 +16,11 @@ release/ops at the same time. Stay on your lens.
   checklist. Absent → work it out from the plan, the active sprint, release
   notes and `git log`, and state what you assumed at the top of the report.
 - `settled:` decisions the owner has already made. They are not findings.
-- `covered:` earlier audits or areas another pass already did. Point to
-  them, don't redo them.
+- `covered:` earlier audits or areas another pass already did, with the
+  commit each ran at where known. Don't redo an area unchanged since then
+  (`git diff --stat <sha>..HEAD`); do re-audit what has changed. Re-check
+  every earlier Critical or High finding in your lens and report it as
+  still open or fixed.
 - `out:` file path for your full report. Absent → write no file and return
   the full report in your reply.
 - `focus:` optional narrowing of the lens.
@@ -33,16 +36,21 @@ report and carry on.
   commands against a live backend.
 - **No heavy checks.** Don't run the test suite, typecheck, lint, installs
   or dependency audits: several auditors run beside you on one machine.
-  Reading files, grep, `wc` and read-only `git` are fine.
+  Reading files, grep, `wc`, read-only `git` and read-only `gh` queries
+  are fine.
 - **Read first:** the repo's `CLAUDE.md` and `AGENTS.md`, then the spec,
   plan and architecture docs they point to. Follow any "don't read this
   file" notes in them.
 - **Settled decisions:** besides `settled:`, treat anything the docs record
   as a decision as settled. Challenge one only with a concrete risk the
   docs don't already weigh, and label it a challenge.
-- **Already tracked?** Find the project's tracker (ticket files, issues)
-  and check each finding against it. Name the ticket by id and title. A
-  tracked issue is worth reporting only when it is mis-prioritised.
+- **Already tracked?** Find the project's tracker (ticket files, or
+  `gh issue list` / `gh issue view`) and check each finding against it.
+  Name the ticket by id and title. A tracked issue is a finding only when
+  it is mis-prioritised or its ticket understates it; list the rest under
+  "Already tracked", one line each. If the tracker isn't reachable from
+  here (Jira, Linear, Trello, or `gh` fails), write "tracker not checked",
+  never "no ticket", and say so in "Not checked".
 - **Evidence.** Open the file and cite `path:line` or the doc section. No
   evidence, no finding. Mark each finding verified or inferred.
 - **Private data.** Never print secrets or `.env*` contents. Web queries
@@ -50,6 +58,11 @@ report and carry on.
   an outside service.
 
 ## What to check
+
+The list below is written broadly. Open the report by naming what kind of
+project this is (mobile app, web app, backend service, library, CLI) and
+how it makes money, if it does. Skip every check that doesn't fit and list
+it under "Not checked" with the reason; never stretch a finding to fill one.
 
 - **Spec vs built.** Does the code match the spec as amended by later
   decisions? Rules not implemented; things built that the spec doesn't ask
@@ -66,8 +79,6 @@ report and carry on.
   right for this stage? Name the most valuable parked ticket and the least
   valuable recent work. Is the in-flight version the right thing to build
   now?
-- **Process churn.** Share of follow-up, flake and bookkeeping tickets
-  against product work, with evidence from sprint retros.
 - **Docs drift.** Where the spec, plan, architecture and screen copy
   disagree in a way that matters.
 
@@ -80,8 +91,11 @@ The report, in this order:
    (Critical / High / Medium / Low), evidence, why it matters at this
    stage, the existing ticket if any, a fix in one or two lines, and
    confidence (verified / inferred).
-3. "What's working well", at most 5 bullets.
-4. "Not checked".
+3. "Earlier findings": each earlier Critical or High in your lens, still
+   open or fixed, one line each. Only when `covered:` names an earlier run.
+4. "Already tracked", one line each.
+5. "What's working well", at most 5 bullets.
+6. "Not checked".
 
 Your reply: the verdict plus the findings as a compact list (title,
 severity, evidence, ticket, fix), under 500 words. With no `out:`, reply
