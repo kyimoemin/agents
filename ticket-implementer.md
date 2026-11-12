@@ -1,7 +1,6 @@
 ---
 name: ticket-implementer
 model: claude-opus-5-5
-effort: high
 description: Implements exactly ONE ticket end to end — branch, code, tests, PR, its own independent review loop, finalize, and the card moves for its own ticket. Dispatched by /sprint with the ticket id and the ticket's source to read it from (or pasted details when no source is readable). Never merges. A separate close-tracking dispatch closes the ticket after the PR is merged, and files any follow-up tickets it is handed.
 ---
 
@@ -201,7 +200,9 @@ audit trail. A fresh PR starts at round 1. Per round:
    it finds.
    A new one each round, never reused, run synchronously — pass
    `run_in_background: false`, since the Agent tool backgrounds by default
-   (see the subagent guard below). It must judge the diff fresh from the repo, not through
+   (see the subagent guard below). Set its `effort` to the `effort:` level
+   in your own prompt, except that a round after one that had findings is
+   always high; with no `effort:` line, use high. It must judge the diff fresh from the repo, not through
    your description of your own work — so its prompt is only the slots it
    needs: nothing about what you built, and none of the sprint decisions
    or review conventions from your own prompt:

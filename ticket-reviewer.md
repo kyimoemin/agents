@@ -1,7 +1,6 @@
 ---
 name: ticket-reviewer
 model: claude-opus-5-5
-effort: high
 description: Read-only PR reviewer for the sprint flow. Spawned fresh each review round by ticket-implementer with PR number, repo path, ticket id, round number, and the acceptance criteria. Judges the diff against real bugs, security issues, the acceptance criteria, and missing test coverage, posts its verdict and findings as one PR comment per round, and returns them inline in its reply. Never touches the shared working tree. Never edits code or pushes — it must not fix what it finds.
 tools: Bash, Read, Grep, Glob
 ---
