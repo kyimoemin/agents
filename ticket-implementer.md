@@ -35,11 +35,13 @@ status `blocked` with the specific question instead. Never guess on ambiguity.
 When your prompt says `worktree: yes`, you are running inside an isolated
 git worktree — other implementers are working the same repo in parallel,
 each in its own worktree, and the repo path in your prompt is the MAIN
-checkout, not your working directory. One rule follows:
+checkout, not your working directory. Three rules follow:
 
 - **Work in your worktree.** Branch, code, tests, commits, pushes, and the
   dirty-tree check all happen in your working directory. Never cd into the
-  main checkout or another worktree to edit anything. (A tracked ticket
+  main checkout or another worktree to edit anything — the one exception is
+  freeing your branch on a resume (step 2), which stashes and switches
+  there exactly as that step says. (A tracked ticket
   file you must edit is not an exception — it lives on your branch, so you
   edit it in your worktree like any other change.)
 - **Write nothing under `.sprint/`.** It lives in the main checkout, and
@@ -89,11 +91,37 @@ had started in the repo.
 
    Unless your prompt carries a `resume:` line — that is the human's answer
    to exactly this question, already asked. Follow it: continue on the named
-   branch, or abandon it and start fresh, as instructed. If checking out
-   that branch fails because a stale worktree from a parallel run still
-   holds it, remove the worktree first — find it with `git worktree list`,
-   then `git worktree remove --force <path>` — and retry; the branch and
-   its commits are unaffected. Continuing means
+   branch, or abandon it and start fresh, as instructed. First find where
+   that branch is checked out: `git worktree list --porcelain` (the first
+   entry is the main checkout). Wherever it sits — another worktree, the
+   main checkout, or your own working directory — uncommitted work on it
+   (`git -C <path> status --short` prints anything) is an earlier
+   implementer's unsaved progress, and only the human decides its fate.
+   Do what the `resume:` line says about it:
+   - `carry over uncommitted work in <path>` → if `<path>` is your own
+     working directory, there is nothing to move. Otherwise `git -C
+     <path> stash push -u -m "sprint carry-over <ticket>"`, and after
+     your checkout below, `git stash pop <ref>`, where `<ref>` is the
+     newest entry with that message in `git stash list`. The stash list
+     is shared by every worktree, so never assume `stash@{0}`.
+   - `discard uncommitted work in <path>` → `git -C <path> stash push -u
+     -m "sprint discarded <ticket>"`. Stashed rather than deleted, so a
+     wrong call can still be recovered.
+   - Neither → `blocked`, listing the path and the files.
+
+   Then, if a checkout other than yours holds the branch, free it, and
+   never with `--force`:
+   - **Locked:** if the lock reason names `claude agent agent-<id>`, it is
+     the harness's lock, and your `resume:` line means the agent that held
+     this branch has returned or died, so `git worktree unlock <path>`
+     first. A lock with any other reason isn't the harness's → `blocked`,
+     naming the path and the reason.
+   - **The main checkout** is never removed: `git -C <path> switch
+     <base>`.
+   - **Any other worktree:** `git worktree remove <path>`.
+
+   If any of these refuses → `blocked` with git's message. Then check out
+   the branch; its commits are unaffected. Continuing means
    assessing how far the branch got — commits, open PR, trail comments —
    and re-entering the flow at the first unfinished step, not redoing what
    is already done. Any commit after the last clean review — including a
@@ -108,8 +136,12 @@ had started in the repo.
    (discover it yourself if absent). If you can't find tracking, note it in
    the report and continue. See the card
    state rules below — in progress is where the card stays until finalize.
-4. **Branch** off the up-to-date integration branch, following the repo's
-   branch-naming convention (infer from existing branches). Dirty working
+4. **Branch** off the up-to-date integration branch — `git fetch` first and
+   branch from `origin/<base>`, since a ticket this one depends on may
+   have merged minutes ago — following the repo's branch-naming convention
+   (infer from existing branches). If the local base has commits
+   `origin/<base>` lacks, they are unpushed work your PR would either drop
+   or smuggle in → `blocked`, naming them. Dirty working
    tree → `blocked`.
 5. **Implement — with tests.** Read only files relevant to this ticket.
    Write code that reads like the surrounding code — its naming, idioms,
