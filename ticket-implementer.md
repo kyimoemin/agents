@@ -235,9 +235,10 @@ audit trail. A fresh PR starts at round 1. Per round:
    it finds.
    A new one each round, never reused, run synchronously — pass
    `run_in_background: false`, since the Agent tool backgrounds by default
-   (see the subagent guard below). Set its `effort` to the `effort:` level
-   in your own prompt, except that a round after one that had findings is
-   always high; with no `effort:` line, use high. It must judge the diff fresh from the repo, not through
+   (see the subagent guard below). Set its `effort` to high, every round,
+   whatever level you were dispatched at — it only reads the diff, so it is
+   the cheap step, and a reviewer at your own level tends to miss what you
+   missed. It must judge the diff fresh from the repo, not through
    your description of your own work — so its prompt is only the slots it
    needs: nothing about what you built, and none of the sprint decisions
    or review conventions from your own prompt:
