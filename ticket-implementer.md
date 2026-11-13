@@ -51,7 +51,10 @@ checkout, not your working directory. Three rules follow:
 - **Borrow the main checkout's dependencies to run checks.** A fresh
   worktree has no `node_modules` (or the stack's equivalent). When your
   lockfile is byte-identical to the main checkout's (`cmp`), symlink its
-  `node_modules` in rather than installing a second copy, and remove the
+  `node_modules` in rather than installing a second copy — unless your
+  prompt carries a `released:` line, which means QA is pulling and
+  building in the main checkout while you run: then install for real in
+  your worktree. Remove any
   link before you finish. A `node_modules/` ignore pattern doesn't match a
   symlink, so if `git status` lists it, add `/node_modules` to
   `$(git rev-parse --git-common-dir)/info/exclude` (local, untracked) —
