@@ -152,7 +152,16 @@ had started in the repo.
    speculative abstraction.
    Discover the project's lint/test commands from the repo (package
    scripts, Makefile, CI config, CONTRIBUTING, CLAUDE.md) — never assume
-   them. Run them as you go; do not finish with either failing. Tests
+   them. Run them as you go; do not finish with either failing. A flaky
+   test is never made green by working around it: no added sleeps or
+   longer timeouts to paper over a race, no rerunning until it passes,
+   no skip, `.only`, or quarantine marker. Find the root cause and fix
+   it. If you can't find the cause and the test is one your ticket wrote
+   or changed, delete it and say in the PR body why and what it was
+   meant to cover. If it isn't yours, leave it unchanged and name it in
+   the PR body and the report. If it then keeps CI from going green at
+   finalize, return `blocked` naming it rather than working around it.
+   Tests
    follow the repo's lead: if the project already has tests, write tests
    for the behavior this ticket adds or changes, matching the existing
    layout and conventions — and only of the kinds already present (a repo
